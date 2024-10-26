@@ -17,6 +17,7 @@ bot.
 import os
 import logging
 from typing import Dict
+from dotenv import load_dotenv
 
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, BotCommand
 from telegram.ext import (
@@ -28,6 +29,8 @@ from telegram.ext import (
     PicklePersistence,
     filters,
 )
+
+load_dotenv()
 
 # Enable logging
 logging.basicConfig(
