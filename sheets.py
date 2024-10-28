@@ -80,7 +80,5 @@ def add_expense(data, category):
             body={'values': [[value] for value in data]}
         ).execute()
 
-        print('Запись добавлена')
-
     except HttpError as err:
         print(err)
