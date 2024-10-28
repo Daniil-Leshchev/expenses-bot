@@ -4,11 +4,6 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    # environment:
-    #   TZ: "${TZ}"
-    #   BOT_TOKEN: "${BOT_TOKEN}"
-    #   PYTHONPATH: "${PYTHONPATH}"
-    # либо просто
     env_file:
       - .env
     command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 main.py "]
