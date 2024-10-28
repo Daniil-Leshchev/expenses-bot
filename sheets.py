@@ -33,9 +33,9 @@ def get_current_month_columns():
     return MONTH_COLUMNS[current_month]
 
 
-def get_category_column():
-    category = int(input('Введите номер категории: '))
-    return category
+# def get_category_column():
+#     category = int(input('Введите номер категории: '))
+#     return category
 
 
 def get_next_empty_row(service, spreadsheet_id, column):
@@ -49,7 +49,7 @@ def get_next_empty_row(service, spreadsheet_id, column):
     return next_empty_row
 
 
-def add_expense(spreadsheet_id, data):
+def add_expense(data):
     creds = None
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
@@ -72,15 +72,15 @@ def add_expense(spreadsheet_id, data):
         if not month_columns:
             raise ValueError('Нет данных для текущего месяца')
 
-        category = get_category_column()
+        category = 0
         next_empty_row = get_next_empty_row(
             service,
-            spreadsheet_id,
+            SPREADSHEET_ID,
             month_columns[category])
 
         range_to_add = f'{month_columns[category]}{next_empty_row}'
         service.spreadsheets().values().update(
-            spreadsheetId=spreadsheet_id,
+            spreadsheetId=SPREADSHEET_ID,
             range=range_to_add,
             valueInputOption='USER_ENTERED',
             body={'values': [[value] for value in data]}
@@ -90,7 +90,3 @@ def add_expense(spreadsheet_id, data):
 
     except HttpError as err:
         print(err)
-
-
-if __name__ == "__main__":
-    add_expense(SPREADSHEET_ID, ['111', '112'])
