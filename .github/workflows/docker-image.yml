@@ -40,3 +40,5 @@ jobs:
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ghcr.io/${{ env.IMAGE_NAME }}:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}

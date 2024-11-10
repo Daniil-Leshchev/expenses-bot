@@ -1,7 +1,7 @@
 services:
   pythontelegrambottemplate:
-    #image: ghcr.io/<ваш профиль гит хаб>/<назввание репозитория>
-    image: pythontelegrambottemplate
+    image: ghcr.io/daniil-leshchev/google-sheets-expenses-bot
+    # image: pythontelegrambottemplate
     build:
       context: .
       dockerfile: ./Dockerfile
