@@ -15,7 +15,6 @@ from telegram.ext import (
 )
 
 from sheets import add_expense
-from authorized_users import AUTHORIZED_USERS
 
 CATEGORIES = {
     'Продукты': 0,
@@ -30,7 +29,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def enter_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Принимает ответ от пользователя через команду /add <сумма траты>'
     user_id = update.message.from_user.id
-    if user_id not in AUTHORIZED_USERS:
+    if user_id != int(os.getenv('AUTHORIZED_USER')):
         await update.message.reply_text('У вас нет прав для использования этого бота')
         return
     if len(context.args) != 1:
