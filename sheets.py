@@ -1,8 +1,6 @@
-import os.path
-
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+import json
+import os
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
@@ -12,6 +10,10 @@ from datetime import datetime as dt
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 SPREADSHEET_ID = "1xbJEoEsmPjAu2uh3Xgg0funAKlDcrRakEEDyDUxXTww"
+
+credentials_info = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
+creds = service_account.Credentials.from_service_account_info(credentials_info)
+scoped_credentials = creds.with_scopes(SCOPES)
 
 
 def generate_month_columns():
@@ -45,24 +47,8 @@ def get_next_empty_row(service, spreadsheet_id, column):
 
 
 def add_expense(data, category):
-    creds = None
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "credentials.json", SCOPES
-            )
-            creds = flow.run_local_server(port=0)
-
-        with open("token.json", "w") as token:
-            token.write(creds.to_json())
-
     try:
-        service = build("sheets", "v4", credentials=creds)
+        service = build("sheets", "v4", credentials=scoped_credentials)
         month_columns = get_current_month_columns()
         if not month_columns:
             raise ValueError('Нет данных для текущего месяца')
