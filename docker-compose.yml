@@ -1,8 +1,10 @@
 services:
   pythontelegrambottemplate:
     image: ghcr.io/daniil-leshchev/expenses-bot
-    env_file:
-      - .env
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - GOOGLE_CREDENTIALS=${GOOGLE_CREDENTIALS}
+      - AUTHORIZED_USER=${AUTHORIZED_USER}
     volumes:
       - ./data:/app/data
     restart: unless-stopped
