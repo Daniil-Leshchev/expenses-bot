@@ -5,9 +5,9 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      BOT_TOKEN
-      GOOGLE_CREDENTIALS
-      AUTHORIZED_USER
+      BOT_TOKEN: "${BOT_TOKEN}"
+      GOOGLE_CREDENTIALS: "${GOOGLE_CREDENTIALS}"
+      AUTHORIZED_USER: "${AUTHORIZED_USER}"
     volumes:
       - ./data:/app/data
     restart: unless-stopped
