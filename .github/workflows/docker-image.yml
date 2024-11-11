@@ -48,4 +48,4 @@ jobs:
           BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
           GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }} \
           AUTHORIZED_USER=${{ secrets.AUTHORIZED_USER }} \
-          docker-compose up -d
+          docker compose up -d
