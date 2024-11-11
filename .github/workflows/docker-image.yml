@@ -43,6 +43,16 @@ jobs:
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
+      - name: Проверка переменных окружения
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          AUTHORIZED_USERS: ${{ secrets.AUTHORIZED_USERS }}
+        run: |
+          echo "BOT_TOKEN: $BOT_TOKEN"
+          echo "GOOGLE_CREDENTIALS: $GOOGLE_CREDENTIALS"
+          echo "AUTHORIZED_USERS: $AUTHORIZED_USERS"
+
       - name: Deploy with Docker Compose
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}

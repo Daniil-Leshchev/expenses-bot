@@ -11,6 +11,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 SPREADSHEET_ID = "1xbJEoEsmPjAu2uh3Xgg0funAKlDcrRakEEDyDUxXTww"
 
+print(os.getenv("GOOGLE_CREDENTIALS"))
 credentials_info = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
 creds = service_account.Credentials.from_service_account_info(credentials_info)
 scoped_credentials = creds.with_scopes(SCOPES)
