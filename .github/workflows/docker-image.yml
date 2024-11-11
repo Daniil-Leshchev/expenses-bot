@@ -48,8 +48,3 @@ jobs:
             ghcr.io/${{ env.IMAGE_NAME }}:latest
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
-          build-args: |
-            ENV_FILE=.env
-
-      - name: Deploy with Docker Compose
-        run: docker compose up -d

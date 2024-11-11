@@ -11,12 +11,17 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
+# Set the working directory
 WORKDIR /app
 COPY . /app
 
-COPY .env /app/.env
+# Copy .env file if it exists
+# The || true at the end ensures the command doesn’t fail if .env is missing
+COPY .env /app/.env || true
 
-RUN export $(cat /app/.env | xargs)
+# Export environment variables from .env if the file exists
+RUN if [ -f /app/.env ]; then export $(cat /app/.env | xargs); fi
+
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
 RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
