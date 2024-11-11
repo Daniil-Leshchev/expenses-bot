@@ -25,7 +25,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Lowercase ${{ github.repository }}
+      - name: Lowercase Repository Name
         run: |
           echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> ${GITHUB_ENV}
       
@@ -43,9 +43,20 @@ jobs:
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
-      - name: Deploy with Docker Compose
+      - name: Check environment variables
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          AUTHORIZED_USER: ${{ secrets.AUTHORIZED_USER }}
         run: |
-          BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
-          GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }} \
-          AUTHORIZED_USER=${{ secrets.AUTHORIZED_USER }} \
-          docker compose up -d
+          # Прямой вывод переменных окружения
+          echo "BOT_TOKEN: $BOT_TOKEN"
+          echo "GOOGLE_CREDENTIALS: $GOOGLE_CREDENTIALS"
+          echo "AUTHORIZED_USER: $AUTHORIZED_USER"
+
+      - name: Deploy with Docker Compose
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          AUTHORIZED_USER: ${{ secrets.AUTHORIZED_USER }}
+        run: docker compose up -d
