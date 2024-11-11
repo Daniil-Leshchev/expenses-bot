@@ -11,16 +11,8 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
-# Set the working directory
 WORKDIR /app
 COPY . /app
-
-# Copy .env file if it exists
-# The || true at the end ensures the command doesn’t fail if .env is missing
-COPY .env /app/.env || true
-
-# Export environment variables from .env if the file exists
-RUN if [ -f /app/.env ]; then export $(cat /app/.env | xargs); fi
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
