@@ -29,7 +29,13 @@ jobs:
         run: |
           echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> ${GITHUB_ENV}
       
-      - name: Build and push
+      - name: Create .env file from secrets
+        run: |
+          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
+          echo "GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }}" >> .env
+          echo "AUTHORIZED_USER=${{ secrets.AUTHORIZED_USER }}" >> .env
+
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -42,17 +48,8 @@ jobs:
             ghcr.io/${{ env.IMAGE_NAME }}:latest
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
-
-      - name: Save GOOGLE_CREDENTIALS as a file
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-        run: echo "$GOOGLE_CREDENTIALS" > google_credentials.json
+        build-args:
+          ENV_FILE: .env
 
       - name: Deploy with Docker Compose
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          AUTHORIZED_USER: ${{ secrets.AUTHORIZED_USER }}
         run: docker compose up -d
-
-      - name: Clean up
-        run: rm google_credentials.json
