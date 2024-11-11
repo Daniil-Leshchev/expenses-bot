@@ -44,8 +44,8 @@ jobs:
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
       - name: Deploy with Docker Compose
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          AUTHORIZED_USER: ${{ secrets.AUTHORIZED_USER }}
-        run: docker compose up -d
+        run: |
+          BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
+          GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }} \
+          AUTHORIZED_USER=${{ secrets.AUTHORIZED_USER }} \
+          docker-compose up -d
