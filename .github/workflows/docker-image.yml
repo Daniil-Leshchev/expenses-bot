@@ -24,7 +24,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lowercase Repository Name
         run: |
@@ -55,10 +55,11 @@ jobs:
           echo "GOOGLE_CREDENTIALS: $GOOGLE_CREDENTIALS"
           echo "AUTHORIZED_USER: $AUTHORIZED_USER"
 
-      - name: Deploy with Docker Compose
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          AUTHORIZED_USER: ${{ secrets.AUTHORIZED_USER }}
+      - name: Create .env file
         run: |
-          BOT_TOKEN=$BOT_TOKEN GOOGLE_CREDENTIALS=$GOOGLE_CREDENTIALS AUTHORIZED_USER=$AUTHORIZED_USER docker compose up -d
+          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
+          echo "GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }}" >> .env
+          echo "AUTHORIZED_USER=${{ secrets.AUTHORIZED_USER }}" >> .env
+
+      - name: Deploy with Docker Compose
+        run: docker compose up -d
