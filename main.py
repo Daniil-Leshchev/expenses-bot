@@ -23,7 +23,7 @@ CATEGORIES = {
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Функция для вывода приветственного сообщения ботом'
-    await update.message.reply_text('Добро пожаловать в бота! Используйте /add, чтобы добавить вашу трату')
+    await update.message.reply_text('Добро пожаловать в бота! Используйте /add, чтобы добавить трату')
 
 
 async def enter_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
