@@ -43,19 +43,16 @@ jobs:
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
-      - name: Проверка переменных окружения
+      - name: Save GOOGLE_CREDENTIALS as a file
         env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          AUTHORIZED_USERS: ${{ secrets.AUTHORIZED_USERS }}
-        run: |
-          echo "BOT_TOKEN: $BOT_TOKEN"
-          echo "GOOGLE_CREDENTIALS: $GOOGLE_CREDENTIALS"
-          echo "AUTHORIZED_USERS: $AUTHORIZED_USERS"
+        run: echo "$GOOGLE_CREDENTIALS" > google_credentials.json
 
       - name: Deploy with Docker Compose
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           AUTHORIZED_USER: ${{ secrets.AUTHORIZED_USER }}
         run: docker compose up -d
+
+      - name: Clean up
+        run: rm google_credentials.json

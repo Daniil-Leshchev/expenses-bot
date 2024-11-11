@@ -6,8 +6,10 @@ services:
       dockerfile: ./Dockerfile
     environment:
       BOT_TOKEN: "${BOT_TOKEN}"
-      GOOGLE_CREDENTIALS: "${GOOGLE_CREDENTIALS}"
       AUTHORIZED_USER: "${AUTHORIZED_USER}"
+      # Указываем путь к файлу как переменную окружения, используемую в приложении
+      GOOGLE_APPLICATION_CREDENTIALS: "/app/google_credentials.json"
     volumes:
       - ./data:/app/data
+      - ./google_credentials.json:/app/google_credentials.json  # Монтируем JSON-файл в контейнер
     restart: unless-stopped

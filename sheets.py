@@ -1,5 +1,3 @@
-import json
-import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -11,7 +9,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 SPREADSHEET_ID = "1xbJEoEsmPjAu2uh3Xgg0funAKlDcrRakEEDyDUxXTww"
 
-creds = service_account.Credentials.from_service_account_file('credentials.json')
+creds = service_account.Credentials.from_service_account_file('/app/google_credentials.json')
 scoped_credentials = creds.with_scopes(SCOPES)
 
 
