@@ -2,7 +2,7 @@ services:
   expensesbot:
     image: ghcr.io/daniil-leshchev/expenses-bot
     env_file:
-      -.env
+      - .env
     volumes:
       - ./data:/app/data
     restart: unless-stopped
