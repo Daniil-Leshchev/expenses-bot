@@ -60,4 +60,5 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           AUTHORIZED_USER: ${{ secrets.AUTHORIZED_USER }}
-        run: docker compose up -d
+        run: |
+          BOT_TOKEN=$BOT_TOKEN GOOGLE_CREDENTIALS=$GOOGLE_CREDENTIALS AUTHORIZED_USER=$AUTHORIZED_USER docker compose up -d
