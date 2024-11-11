@@ -1,6 +1,6 @@
 services:
   pythontelegrambottemplate:
-    image: ghcr.io/daniil-leshchev/google-sheets-expenses-bot
+    image: ghcr.io/daniil-leshchev/expenses-bot
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - GOOGLE_CREDENTIALS=${GOOGLE_CREDENTIALS}
