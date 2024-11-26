@@ -9,7 +9,7 @@ from datetime import datetime as dt
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-SPREADSHEET_ID = "1xbJEoEsmPjAu2uh3Xgg0funAKlDcrRakEEDyDUxXTww"
+SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
 
 google_credentials = os.getenv("GOOGLE_CREDENTIALS")
 if google_credentials:
