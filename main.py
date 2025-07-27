@@ -1,5 +1,8 @@
 import os
 
+from datetime import time as dt_time
+from zoneinfo import ZoneInfo
+
 from telegram import (
     Update,
     BotCommand,
@@ -139,11 +142,15 @@ async def handle_plain_expense(update: Update, context: ContextTypes.DEFAULT_TYP
     await enter_expense(update, context)
 
 
-async def unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    'Обрабатывает неизвестные команды'
-    if update.message is None:
-        return
-    await update.message.reply_text('Неизвестная команда')
+async def daily_expense_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = int(os.getenv('AUTHORIZED_USER', '0'))
+    try:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text='Не забудьте записать траты за сегодняшний день'
+        )
+    except Exception:
+        pass
 
 
 async def post_init(application: Application) -> None:
@@ -175,11 +182,13 @@ def main() -> None:
             handle_plain_expense
         )
     )
-    application.add_handler(
-        MessageHandler(
-            filters.COMMAND,
-            unknown_command
-        )
+
+    job_queue = application.job_queue
+    if job_queue is None:
+        return
+    job_queue.run_daily(
+        daily_expense_reminder,
+        time=dt_time(hour=20, minute=0, tzinfo=ZoneInfo('Asia/Yekaterinburg'))
     )
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
