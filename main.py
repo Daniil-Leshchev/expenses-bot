@@ -11,7 +11,9 @@ from telegram.ext import (
     Application,
     CommandHandler,
     ContextTypes,
-    CallbackQueryHandler
+    CallbackQueryHandler,
+    MessageHandler,
+    filters
 )
 
 from sheets import add_expense
@@ -27,7 +29,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message is None:
         return
     await update.message.reply_text(
-        'Добро пожаловать в бота!! Используйте /add, чтобы добавить трату'
+        'Добро пожаловать в бота! Используйте /add, чтобы добавить трату'
     )
 
 
@@ -128,6 +130,15 @@ async def add_to_sheet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         )
 
 
+async def handle_plain_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    'Обрабатывает ввод только числа как сумму траты'
+    if update.message is None or update.message.text is None:
+        return
+    text = update.message.text.strip()
+    context.args = [text]
+    await enter_expense(update, context)
+
+
 async def post_init(application: Application) -> None:
     bot_commands = [
         BotCommand('start', 'Начало работы с ботом'),
@@ -149,6 +160,12 @@ def main() -> None:
         CallbackQueryHandler(
             add_to_sheet,
             pattern='^category_',
+        )
+    )
+    application.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND & filters.Regex(r'^\d+(\.\d+)?$'),
+            handle_plain_expense
         )
     )
 
