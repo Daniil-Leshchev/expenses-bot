@@ -176,7 +176,7 @@ async def daily_expense_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
         pass
 
 
-async def get_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def get_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     total, remaining = get_monthly_total()
     message = (
         f'Общие траты за месяц: {total} руб.\n'
