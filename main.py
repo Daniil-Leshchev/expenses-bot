@@ -139,6 +139,13 @@ async def handle_plain_expense(update: Update, context: ContextTypes.DEFAULT_TYP
     await enter_expense(update, context)
 
 
+async def unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    'Обрабатывает неизвестные команды'
+    if update.message is None:
+        return
+    await update.message.reply_text('Неизвестная команда')
+
+
 async def post_init(application: Application) -> None:
     bot_commands = [
         BotCommand('start', 'Начало работы с ботом'),
@@ -166,6 +173,12 @@ def main() -> None:
         MessageHandler(
             filters.TEXT & ~filters.COMMAND & filters.Regex(r'^\d+(\.\d+)?$'),
             handle_plain_expense
+        )
+    )
+    application.add_handler(
+        MessageHandler(
+            filters.COMMAND,
+            unknown_command
         )
     )
 
