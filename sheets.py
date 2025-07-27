@@ -87,7 +87,7 @@ def get_monthly_total():
     cell = f'{TOTAL_COLUMN}{row}'
     result = service.spreadsheets().values().get(
         spreadsheetId=SPREADSHEET_ID,
-        range=cell
+        range=f'Подсчет!{cell}'
     ).execute()
     values = result.get('values', [])
     total_str = values[0][0] if values and values[0] else None
