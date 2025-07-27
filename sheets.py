@@ -99,7 +99,7 @@ def get_monthly_total():
     balance_cell = 'N2'
     balance_result = service.spreadsheets().values().get(
         spreadsheetId=SPREADSHEET_ID,
-        range=balance_cell
+        range=f'Подсчет!{balance_cell}'
     ).execute()
     balance_values = balance_result.get('values', [])
     balance_str = balance_values[0][0] if balance_values and balance_values[0] else None

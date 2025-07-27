@@ -179,8 +179,8 @@ async def daily_expense_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
 async def get_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     total, remaining = get_monthly_total()
     message = (
-        f'Общие траты за месяц: {total} руб.\n'
-        f'Остаток: {remaining:.2f} руб.'
+        f'Общие траты за месяц: {int(total)}\n'
+        f'Остаток: {int(remaining)}'
     )
     await context.bot.send_message(
         chat_id=AUTHORIZED_USER_ID,
