@@ -2,7 +2,7 @@ import os
 
 from telegram import (
     Update,
-    BotCommand, 
+    BotCommand,
     InlineKeyboardButton,
     InlineKeyboardMarkup
 )
@@ -21,64 +21,111 @@ CATEGORIES = {
     'Еда вне дома': 1
 }
 
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Функция для вывода приветственного сообщения ботом'
-    await update.message.reply_text('Добро пожаловать в бота! Используйте /add, чтобы добавить трату')
+    if update.message is None:
+        return
+    await update.message.reply_text(
+        'Добро пожаловать в бота!! Используйте /add, чтобы добавить трату'
+    )
 
 
 async def enter_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Принимает ответ от пользователя через команду /add <сумма траты>'
-    user_id = update.message.from_user.id
-    if user_id != int(os.getenv('AUTHORIZED_USER')):
-        await update.message.reply_text('У вас нет прав для использования этого бота')
+    if not (update.message and context.user_data and update.message.from_user):
         return
-    if len(context.args) != 1:
-        await update.message.reply_text('Используйте /add <сумма_траты>')
+    user_id = update.message.from_user.id
+    if user_id != int(os.getenv('AUTHORIZED_USER', '0')):
+        await update.message.reply_text(
+            'У вас нет прав для использования этого бота'
+        )
+        return
+    args = context.args or []
+    if len(args) != 1:
+        await update.message.reply_text(
+            'Используйте /add <сумма_траты>'
+        )
         return
     try:
-        expense = float(context.args[0])  # берем первый аргумент после команды
-        context.user_data['expense'] = expense  # в контекст записываем сумму траты
+        expense = float(args[0])  # берем первый аргумент после команды
+        # в контекст записываем сумму траты
+        context.user_data['expense'] = expense
         await ask_for_category(update, context)
     except ValueError:
-        await update.message.reply_text('Вы должны указать сумму траты в виде числа')
+        await update.message.reply_text(
+            'Вы должны указать сумму траты в виде числа'
+        )
         return
 
 
 async def ask_for_category(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Создает клавиатуру с категориями для выбора пользователем'
+    if update.message is None:
+        return
     keyboard = [
-        [InlineKeyboardButton('Продукты', callback_data='category_Продукты')],
-        [InlineKeyboardButton('Еда вне дома', callback_data='category_Еда вне дома')]
+        [
+            InlineKeyboardButton(
+                'Продукты',
+                callback_data='category_Продукты',
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                'Еда вне дома',
+                callback_data='category_Еда вне дома',
+            ),
+        ],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard) # создаем клавиатуру с опциями выбора
+    # создаем клавиатуру с опциями выбора
+    reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text('Выберите категорию:', reply_markup=reply_markup)
 
 
 async def add_to_sheet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Извлекает сумму траты, категорию из контекста и колбэка и вызывает функцию для работы с api'
-    query = update.callback_query
-    await query.answer() # ожидаем ответ от запроса
+    if update.callback_query is None:
+        return
+    if context.user_data is None:
+        return
 
-    category_name = query.data.split('_')[1] # отделяем категорию от полного запроса
-    category_index = CATEGORIES.get(category_name) # забираем индекс, по которому будем вносить данные в таблицу
+    query = update.callback_query
+    await query.answer()
+    if query.data is None:
+        return
+    parts = query.data.split('_')
+    if len(parts) < 2:
+        await query.edit_message_text('Неизвестная категория')
+        return
+    category_name = parts[1]
+    # забираем индекс, по которому будем вносить данные в таблицу
+    category_index = CATEGORIES.get(category_name)
 
     if category_index is None:
-        await query.edit_message_text('Неизвестная категория. Попробуйте снова')
+        await query.edit_message_text(
+            'Неизвестная категория. Попробуйте снова'
+        )
         return
 
     expense = context.user_data.get('expense')
     if expense is None:
-        await query.edit_message_text('Произошла ошибка. Пожалуйста, начните с /add')
+        await query.edit_message_text(
+            'Произошла ошибка. Пожалуйста, начните с /add'
+        )
         return
 
     try:
-        add_expense([expense], category_index) # данные необходимо передавать в виде списка
+        # данные необходимо передавать в виде списка
+        add_expense([expense], category_index)
         if expense == int(expense):
             expense = int(expense)
-        await query.edit_message_text(f'Сумма {expense} добавлена в категорию {category_name}')
+        await query.edit_message_text(
+            f'Сумма {expense} добавлена в категорию {category_name}'
+        )
     except Exception as e:
-        await query.edit_message_text(f'Произошла ошибка при добавлении данных: {e}')
-
+        await query.edit_message_text(
+            f'Произошла ошибка при добавлении данных: {e}'
+        )
 
 
 async def post_init(application: Application) -> None:
@@ -90,11 +137,20 @@ async def post_init(application: Application) -> None:
 
 
 def main() -> None:
-    application = Application.builder().token(os.getenv('BOT_TOKEN')).post_init(post_init).build()
+    bot_token = os.getenv('BOT_TOKEN')
+    if bot_token is None:
+        return
+    application = Application.builder().token(
+        bot_token).post_init(post_init).build()
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('add', enter_expense))
-    application.add_handler(CallbackQueryHandler(add_to_sheet, pattern='^category_')) # обработчик колбэка с паттерном
+    application.add_handler(
+        CallbackQueryHandler(
+            add_to_sheet,
+            pattern='^category_',
+        )
+    )
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
