@@ -14,7 +14,8 @@ SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
 google_credentials = os.getenv("GOOGLE_CREDENTIALS")
 if google_credentials:
     credentials_info = json.loads(google_credentials)
-    creds = service_account.Credentials.from_service_account_info(credentials_info)
+    creds = service_account.Credentials.from_service_account_info(
+        credentials_info)
 else:
     raise ValueError("GOOGLE_CREDENTIALS not set or empty")
 
@@ -73,3 +74,39 @@ def add_expense(data, category):
 
     except HttpError as err:
         print(err)
+
+
+TOTAL_COLUMN = 'D'
+
+
+def get_monthly_total():
+    service = build("sheets", "v4", credentials=scoped_credentials)
+    month = dt.now().month
+    # строка = месяц + 1 (учитывая заголовок в первой строке)
+    row = month + 1
+    cell = f'{TOTAL_COLUMN}{row}'
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID,
+        range=cell
+    ).execute()
+    values = result.get('values', [])
+    total_str = values[0][0] if values and values[0] else None
+    try:
+        total_val = float(total_str)
+    except (TypeError, ValueError):
+        total_val = 0.0
+
+    balance_cell = 'N2'
+    balance_result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID,
+        range=balance_cell
+    ).execute()
+    balance_values = balance_result.get('values', [])
+    balance_str = balance_values[0][0] if balance_values and balance_values[0] else None
+    try:
+        balance_val = float(balance_str)
+    except (TypeError, ValueError):
+        balance_val = 0.0
+
+    remaining = balance_val - total_val
+    return total_val, remaining

@@ -1,15 +1,5 @@
-import os
-
 from datetime import time as dt_time
-from zoneinfo import ZoneInfo
-
-from telegram import (
-    Update,
-    BotCommand,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup
-)
-
+from sheets import add_expense, get_monthly_total
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -18,8 +8,43 @@ from telegram.ext import (
     MessageHandler,
     filters
 )
+from telegram import (
+    Update,
+    BotCommand,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
+)
+from zoneinfo import ZoneInfo
+import os
+from functools import wraps
 
-from sheets import add_expense
+
+CATEGORIES = {
+    'Продукты': 0,
+    'Еда вне дома': 1
+}
+
+AUTHORIZED_USER_ID = int(os.getenv('AUTHORIZED_USER', '0'))
+
+
+def authorized_only(func):
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        user = update.effective_user
+        if user is None or user.id != AUTHORIZED_USER_ID:
+            if update.message:
+                await update.message.reply_text(
+                    'У вас нет прав для использования этого бота'
+                )
+            elif update.callback_query:
+                await update.callback_query.answer(
+                    'У вас нет прав для использования этого бота',
+                    show_alert=True
+                )
+            return
+        return await func(update, context)
+    return wrapper
+
 
 CATEGORIES = {
     'Продукты': 0,
@@ -27,6 +52,7 @@ CATEGORIES = {
 }
 
 
+@authorized_only
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Функция для вывода приветственного сообщения ботом'
     if update.message is None:
@@ -36,15 +62,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
+@authorized_only
 async def enter_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Принимает ответ от пользователя через команду /add <сумма траты>'
-    if not (update.message and context.user_data and update.message.from_user):
-        return
-    user_id = update.message.from_user.id
-    if user_id != int(os.getenv('AUTHORIZED_USER', '0')):
-        await update.message.reply_text(
-            'У вас нет прав для использования этого бота'
-        )
+    if update.message is None or context.user_data is None \
+       or update.message.from_user is None:
         return
     args = context.args or []
     if len(args) != 1:
@@ -87,6 +109,7 @@ async def ask_for_category(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await update.message.reply_text('Выберите категорию:', reply_markup=reply_markup)
 
 
+@authorized_only
 async def add_to_sheet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Извлекает сумму траты, категорию из контекста и колбэка и вызывает функцию для работы с api'
     if update.callback_query is None:
@@ -133,6 +156,7 @@ async def add_to_sheet(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         )
 
 
+@authorized_only
 async def handle_plain_expense(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     'Обрабатывает ввод только числа как сумму траты'
     if update.message is None or update.message.text is None:
@@ -143,20 +167,32 @@ async def handle_plain_expense(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 async def daily_expense_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_id = int(os.getenv('AUTHORIZED_USER', '0'))
     try:
         await context.bot.send_message(
-            chat_id=user_id,
+            chat_id=AUTHORIZED_USER_ID,
             text='Не забудьте записать траты за сегодняшний день'
         )
     except Exception:
         pass
 
 
+async def get_stats(context: ContextTypes.DEFAULT_TYPE) -> None:
+    total, remaining = get_monthly_total()
+    message = (
+        f'Общие траты за месяц: {total} руб.\n'
+        f'Остаток: {remaining:.2f} руб.'
+    )
+    await context.bot.send_message(
+        chat_id=AUTHORIZED_USER_ID,
+        text=message
+    )
+
+
 async def post_init(application: Application) -> None:
     bot_commands = [
         BotCommand('start', 'Начало работы с ботом'),
-        BotCommand('add', 'Добавить трату')
+        BotCommand('add', 'Добавить трату'),
+        BotCommand('stats', 'Посмотреть статистику за месяц')
     ]
     await application.bot.set_my_commands(bot_commands)
 
@@ -170,6 +206,7 @@ def main() -> None:
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('add', enter_expense))
+    application.add_handler(CommandHandler('stats', get_stats))
     application.add_handler(
         CallbackQueryHandler(
             add_to_sheet,
