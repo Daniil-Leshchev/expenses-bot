@@ -1,5 +1,5 @@
 # To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
-python-telegram-bot
+python-telegram-bot[job-queue]
 python-dotenv
 google-auth
 google-auth-oauthlib
